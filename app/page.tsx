@@ -153,27 +153,43 @@ export default function Home() {
 
   const [cvDownloadState, setCvDownloadState] = useState<'idle' | 'generating' | 'downloading' | 'complete'>('idle');
   const [emailCopyState, setEmailCopyState] = useState<'idle' | 'copied'>('idle');
+  const [resumeFormat, setResumeFormat] = useState<'pdf' | 'docx'>('pdf');
+  const [isNavbarFormatOpen, setIsNavbarFormatOpen] = useState(false);
+  const [isContactFormatOpen, setIsContactFormatOpen] = useState(false);
 
-  const triggerCvDownload = () => {
+  const triggerCvDownload = async (format: 'pdf' | 'docx' = resumeFormat) => {
     if (cvDownloadState !== 'idle') return;
 
-    setCvDownloadState('generating');
-    
-    setTimeout(() => {
+    try {
+      setCvDownloadState('generating');
+      
+      // Simulate processing delay
+      await new Promise(resolve => setTimeout(resolve, 850));
       setCvDownloadState('downloading');
-    }, 850);
 
-    setTimeout(() => {
+      // Call external API
+      const apiUrl = `https://resume-alter.vercel.app/api/resume?userId=1&token=7ad8c8488d2fea3c&format=${format}`;
+      const response = await fetch(apiUrl);
+      
+      if (!response.ok) throw new Error('Failed to download resume');
+
+      const blob = await response.blob();
       const link = document.createElement('a');
-      link.href = '/vishal_resume.pdf'; 
-      link.download = 'Vishal_Resume.pdf';
+      link.href = URL.createObjectURL(blob);
+      link.download = `Vishal_Resume.${format}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
       
       setCvDownloadState('complete');
-    }, 1500);
+      setResumeFormat(format);
+    } catch (error) {
+      console.error('Resume download error:', error);
+      setCvDownloadState('idle');
+    }
 
+    // Reset state after completion
     setTimeout(() => {
       setCvDownloadState('idle');
     }, 3500);
@@ -328,8 +344,50 @@ export default function Home() {
             ))}
           </div>
 
-          {/* WhatsApp Direct / Right */}
-          <div>
+          {/* Right: Resume Download & WhatsApp */}
+          <div className="hidden lg:flex items-center space-x-4 relative">
+            {/* Resume Download with Dropdown Selector */}
+            <Magnetic range={60} strength={0.3}>
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setIsNavbarFormatOpen((prev) => !prev);
+                    setIsContactFormatOpen(false);
+                  }}
+                  className="inline-flex items-center space-x-2 text-xs uppercase tracking-widest text-brand-dark border border-brand-dark px-6 py-3 hover:bg-brand-dark hover:text-brand-bg transition-colors duration-300"
+                  aria-expanded={isNavbarFormatOpen}
+                  aria-controls="navbar-resume-menu"
+                >
+                  <Download size={14} />
+                  <span>Resume</span>
+                </button>
+
+                {isNavbarFormatOpen && (
+                  <div id="navbar-resume-menu" className="absolute right-0 mt-3 w-44 rounded-2xl border border-brand-divider/50 bg-brand-bg shadow-[0_24px_64px_rgba(0,0,0,0.12)]">
+                    <button
+                      onClick={() => {
+                        triggerCvDownload('pdf');
+                        setIsNavbarFormatOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-xs uppercase tracking-widest text-brand-dark hover:bg-brand-divider/20 transition-colors duration-200"
+                    >
+                      PDF
+                    </button>
+                    <button
+                      onClick={() => {
+                        triggerCvDownload('docx');
+                        setIsNavbarFormatOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-xs uppercase tracking-widest text-brand-dark hover:bg-brand-divider/20 transition-colors duration-200"
+                    >
+                      Word
+                    </button>
+                  </div>
+                )}
+              </div>
+            </Magnetic>
+
+            {/* WhatsApp Direct */}
             <Magnetic range={60} strength={0.3}>
               <a
                 href="https://wa.me/919353802971?text=Hi%20Vishal,%20I%20saw%20your%20portfolio%20and%20wanted%20to%20discuss%20a%20project/role."
@@ -925,37 +983,47 @@ export default function Home() {
               </a>
             </Magnetic>
 
-            {/* Download CV */}
+            {/* Resume Download with Dropdown Selector */}
             <Magnetic range={40} strength={0.3}>
-              <button
-                onClick={triggerCvDownload}
-                className="flex items-center space-x-3 text-xs uppercase tracking-widest text-brand-dark border border-brand-dark px-8 py-4 hover:bg-brand-dark hover:text-brand-bg transition-all duration-300 cursor-pointer"
-              >
-                {cvDownloadState === 'idle' && (
-                  <>
+              <div className="relative w-full max-w-xs">
+                <button
+                  onClick={() => {
+                    setIsContactFormatOpen((prev) => !prev);
+                    setIsNavbarFormatOpen(false);
+                  }}
+                  className="flex w-full items-center justify-center text-xs uppercase tracking-widest text-brand-dark border border-brand-dark px-8 py-4 hover:bg-brand-dark hover:text-brand-bg transition-all duration-300 cursor-pointer"
+                  aria-expanded={isContactFormatOpen}
+                  aria-controls="contact-resume-menu"
+                >
+                  <span className="inline-flex items-center space-x-3">
                     <Download size={16} />
-                    <span>Download CV</span>
-                  </>
+                    <span>Resume</span>
+                  </span>
+                </button>
+
+                {isContactFormatOpen && (
+                  <div id="contact-resume-menu" className="absolute left-0 right-0 mt-3 rounded-2xl border border-brand-divider/50 bg-brand-bg shadow-[0_24px_64px_rgba(0,0,0,0.12)] overflow-hidden">
+                    <button
+                      onClick={() => {
+                        triggerCvDownload('pdf');
+                        setIsContactFormatOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-xs uppercase tracking-widest text-brand-dark hover:bg-brand-divider/20 transition-colors duration-200"
+                    >
+                      PDF
+                    </button>
+                    <button
+                      onClick={() => {
+                        triggerCvDownload('docx');
+                        setIsContactFormatOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-xs uppercase tracking-widest text-brand-dark hover:bg-brand-divider/20 transition-colors duration-200"
+                    >
+                      Word
+                    </button>
+                  </div>
                 )}
-                {cvDownloadState === 'generating' && (
-                  <>
-                    <span className="w-2.5 h-2.5 rounded-full bg-brand-accent animate-ping" />
-                    <span>Generating PDF...</span>
-                  </>
-                )}
-                {cvDownloadState === 'downloading' && (
-                  <>
-                    <span className="w-2.5 h-2.5 rounded-full bg-brand-accent animate-pulse" />
-                    <span>Downloading...</span>
-                  </>
-                )}
-                {cvDownloadState === 'complete' && (
-                  <>
-                    <Check size={16} className="text-[#5DB075]" />
-                    <span className="text-[#5DB075]">CV Downloaded!</span>
-                  </>
-                )}
-              </button>
+              </div>
             </Magnetic>
 
             {/* Copy Email Address */}
