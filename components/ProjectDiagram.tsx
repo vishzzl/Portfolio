@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 // Common SVG Grid Background
@@ -164,7 +162,7 @@ export function SaaSDiagram() {
 
         {/* Animated Flying Packets (using native SVG animateMotion for 100% browser compatibility) */}
         {/* Gateway to Auth.svc */}
-        <circle r="3" fill="#B69B75">
+        <circle r="3" fill="#B69B75" className="motion-packet">
           <animateMotion 
             dur="2s" 
             repeatCount="indefinite" 
@@ -176,7 +174,7 @@ export function SaaSDiagram() {
         </circle>
 
         {/* Gateway to Core.svc */}
-        <circle r="3" fill="#0E0E0E">
+        <circle r="3" fill="#0E0E0E" className="motion-packet">
           <animateMotion 
             dur="1.8s" 
             begin="0.3s"
@@ -189,7 +187,7 @@ export function SaaSDiagram() {
         </circle>
 
         {/* Gateway to Jobs.svc */}
-        <circle r="3" fill="#B69B75">
+        <circle r="3" fill="#B69B75" className="motion-packet">
           <animateMotion 
             dur="2.2s" 
             begin="0.6s"
@@ -202,7 +200,7 @@ export function SaaSDiagram() {
         </circle>
 
         {/* Core.svc to Azure Bus */}
-        <circle r="3" fill="#0E0E0E">
+        <circle r="3" fill="#0E0E0E" className="motion-packet">
           <animateMotion 
             dur="2s" 
             begin="0.8s"
@@ -215,7 +213,7 @@ export function SaaSDiagram() {
         </circle>
 
         {/* Jobs.svc to Azure Bus */}
-        <circle r="3" fill="#B69B75">
+        <circle r="3" fill="#B69B75" className="motion-packet">
           <animateMotion 
             dur="1.7s" 
             begin="0.2s"

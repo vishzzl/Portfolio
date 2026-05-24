@@ -1,6 +1,4 @@
-'use client';
-
-import React, { useState } from 'react';
+import React from 'react';
 
 // Strict TypeScript interfaces matching requirements
 interface Certification {
@@ -108,14 +106,12 @@ const CERTIFICATIONS: Certification[] = [
 ];
 
 export default function Certifications() {
-  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
-
   const expertCert = CERTIFICATIONS.find(c => c.tier === 'expert')!;
   const associateCerts = CERTIFICATIONS.filter(c => c.tier === 'associate');
   const fundamentalsCerts = CERTIFICATIONS.filter(c => c.tier === 'fundamentals');
 
   return (
-    <section id="certifications" className="py-24 md:py-36 border-b border-brand-divider scroll-mt-20 select-none bg-[#FAF9F6]">
+    <section id="certifications" className="section-shell border-b border-brand-divider scroll-mt-24 select-none bg-[#FAF9F6]">
       
       {/* 1. SECTION HEADER (Full width) */}
       <div className="w-full flex items-baseline justify-between border-b border-brand-divider pb-3 mb-12">
@@ -130,11 +126,7 @@ export default function Certifications() {
         </span>
       </div>
 
-      <div 
-        onMouseEnter={() => setHoveredRow(expertCert.id)}
-        onMouseLeave={() => setHoveredRow(null)}
-        className="group relative w-full py-8 md:py-10 px-4 md:px-6 flex flex-col md:flex-row items-center justify-between transition-colors duration-300 hover:bg-[#F2F1EC]/20 overflow-hidden mb-12"
-      >
+      <div className="group relative w-full py-8 md:py-10 px-4 md:px-6 flex flex-col md:flex-row items-center justify-between transition-colors duration-300 hover:bg-[#F2F1EC]/20 overflow-hidden mb-12">
         {/* Absolute Left Gold Line */}
         <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#B69B75] origin-bottom scale-y-0 group-hover:scale-y-100 transition-transform duration-500 ease-out" />
 
@@ -157,7 +149,7 @@ export default function Certifications() {
           </div>
 
           {/* Verification Box - Fades In on Hover */}
-          <div className="absolute right-0 pr-4 flex flex-col items-end text-right transition-opacity duration-300 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto">
+          <div className="absolute right-0 pr-4 flex flex-col items-end text-right transition-opacity duration-300 opacity-100 md:opacity-0 md:group-hover:opacity-100 pointer-events-auto md:pointer-events-none md:group-hover:pointer-events-auto md:group-focus-within:opacity-100 md:group-focus-within:pointer-events-auto">
             <span className="font-mono text-[9px] text-[#999] uppercase tracking-wider mb-0.5">Credential ID</span>
             <span className="font-mono text-[11px] text-[#0E0E0E] font-medium tracking-wide mb-3">{expertCert.credentialId}</span>
             <a 
@@ -190,8 +182,6 @@ export default function Certifications() {
             return (
               <div
                 key={cert.id}
-                onMouseEnter={() => setHoveredRow(cert.id)}
-                onMouseLeave={() => setHoveredRow(null)}
                 className="group relative flex flex-col justify-between p-5 bg-[#FAF9F6] hover:bg-[#F2F1EC]/15 transition-all duration-300 min-h-[160px] overflow-hidden"
               >
                 {/* Absolute Left Gold Line Highlight */}
@@ -221,15 +211,15 @@ export default function Certifications() {
                 </div>
 
                 {/* Card Bottom Block */}
-                <div className="w-full relative min-h-[36px] flex items-end">
+                <div className="w-full relative min-h-[52px] md:min-h-[36px] flex items-end">
                   {/* Default Validity State */}
-                  <div className="w-full transition-opacity duration-300 opacity-100 group-hover:opacity-0 flex justify-between items-baseline font-mono text-[10px] text-[#999] uppercase">
+                  <div className="hidden md:flex w-full transition-opacity duration-300 opacity-100 group-hover:opacity-0 group-focus-within:opacity-0 justify-between items-baseline font-mono text-[10px] text-[#999] uppercase">
                     <span>Validity</span>
                     <span className="text-[#0E0E0E]">{cert.validFrom} — {cert.validTo}</span>
                   </div>
 
                   {/* Hover ID/Verify State */}
-                  <div className="absolute inset-0 w-full flex items-end justify-between transition-opacity duration-300 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto">
+                  <div className="static md:absolute md:inset-0 w-full flex items-end justify-between gap-3 transition-opacity duration-300 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 pointer-events-auto md:pointer-events-none md:group-hover:pointer-events-auto md:group-focus-within:pointer-events-auto">
                     <div className="flex flex-col items-start text-left font-mono">
                       <span className="text-[8px] text-[#999] uppercase leading-none mb-0.5">Credential ID</span>
                       <span className="text-[10px] text-[#0E0E0E] font-medium tracking-wide leading-none">{cert.credentialId}</span>
@@ -263,21 +253,14 @@ export default function Certifications() {
         </div>
 
         {/* Index Table List */}
-        <div className="w-full flex flex-col">
+        <div className="w-full flex flex-col cert-list">
           {fundamentalsCerts.map((cert, index) => {
             const itemNumber = `0${index + 5}`; // Maps to 05, 06, 07, 08, 09
-            const isRowHovered = hoveredRow === cert.id;
-            const isAnyRowHovered = hoveredRow !== null;
-            const isMuted = isAnyRowHovered && !isRowHovered;
 
             return (
               <div
                 key={cert.id}
-                onMouseEnter={() => setHoveredRow(cert.id)}
-                onMouseLeave={() => setHoveredRow(null)}
-                className={`group relative w-full border-b border-brand-divider/60 py-4 transition-all duration-300 flex items-center ${
-                  isMuted ? 'opacity-40' : 'opacity-100'
-                }`}
+                className="cert-row group relative w-full border-b border-brand-divider/60 py-4 transition-all duration-300 flex items-center"
               >
                 {/* Thin vertical gold left tick mark (2px x 12px) */}
                 <div className="absolute left-0 w-[2px] h-[12px] bg-[#B69B75] opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ top: 'calc(50% - 6px)' }} />

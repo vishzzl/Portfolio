@@ -29,18 +29,67 @@
 :root {
   background-color: #FAF9F6;
   color: #0E0E0E;
+  --container-inline: clamp(1rem, 4vw, 3rem);
+  --section-block: clamp(4.75rem, 10vw, 9rem);
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Global Reset & Base */
 html {
-  scroll-behavior: auto; /* Handled by Lenis scroll */
+  scroll-behavior: smooth;
+  scroll-padding-top: clamp(5rem, 12vw, 6.5rem);
   background-color: #FAF9F6;
+  text-size-adjust: 100%;
 }
 
 body {
   background-color: #FAF9F6;
   color: #0E0E0E;
-  overflow-x: hidden;
+  overflow-x: clip;
+  min-width: 320px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+}
+
+.section-shell {
+  padding-block: var(--section-block);
+  scroll-margin-top: clamp(5rem, 12vw, 6.5rem);
+}
+
+.focus-visible-ring {
+  outline: none;
+}
+
+.focus-visible-ring:focus-visible {
+  outline: 2px solid #B69B75;
+  outline-offset: 3px;
+}
+
+.text-balance {
+  text-wrap: balance;
 }
 
 /* Lenis Scroll Settings */
@@ -95,27 +144,36 @@ html.lenis {
   clip-path: polygon(0 -20%, 100% -20%, 100% 125%, 0 125%);
 }
 
-/* SVG border drawing animations */
-.draw-border-svg {
-  pointer-events: none;
+/* CSS-only border drawing avoids per-card ResizeObserver work. */
+.draw-border-container::before {
+  content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(#B69B75, #B69B75) top left / 0 1px no-repeat,
+    linear-gradient(#B69B75, #B69B75) top right / 1px 0 no-repeat,
+    linear-gradient(#B69B75, #B69B75) bottom right / 0 1px no-repeat,
+    linear-gradient(#B69B75, #B69B75) bottom left / 1px 0 no-repeat;
+  transition:
+    background-size 0.72s var(--ease-premium),
+    opacity 0.24s ease;
+  opacity: 0.95;
+  z-index: 1;
 }
 
-.draw-border-rect {
-  fill: none;
-  stroke: #B69B75;
-  stroke-width: 1.5px;
-  stroke-dasharray: 2000;
-  stroke-dashoffset: 2000;
-  transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+.draw-border-container:hover::before,
+.draw-border-container:focus-within::before {
+  background-size:
+    100% 1px,
+    1px 100%,
+    100% 1px,
+    1px 100%;
 }
 
-.draw-border-container:hover .draw-border-rect {
-  stroke-dashoffset: 0;
+.draw-border-container > * {
+  position: relative;
+  z-index: 2;
 }
 
 /* Animated/Static Noise Overlay */
@@ -149,6 +207,34 @@ html.lenis {
   }
 }
 
+@media (max-width: 767px) {
+  .noise-overlay {
+    opacity: 0.025;
+  }
+
+  .project-card .flow-line,
+  .project-card .flow-line-reverse,
+  .project-card .running-line,
+  .project-card .rotating-ring,
+  .project-card .draw-line,
+  .project-card .pulse-dot,
+  .project-card .scanner-line,
+  .project-card .pulse-node,
+  .project-card .db-pulse {
+    animation: none !important;
+  }
+
+  .project-card .motion-packet {
+    display: none;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cert-list:hover .cert-row:not(:hover) {
+    opacity: 0.42;
+  }
+}
+
 @keyframes noiseShift {
   0%, 100% { transform: translate(0, 0); }
   10% { transform: translate(-1%, -2%); }
@@ -164,13 +250,14 @@ html.lenis {
 
 /* Performance optimizations for mobile */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-  .draw-border-rect {
-    transition: none !important;
   }
 }

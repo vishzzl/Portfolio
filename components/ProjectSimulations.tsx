@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Play, RotateCcw, AlertTriangle, Cpu, Zap, Database, Search, ShieldCheck, Activity } from 'lucide-react';
 
 // ==========================================
@@ -50,16 +50,19 @@ export function RAGSimulation() {
   const [log, setLog] = useState<string[]>([]);
   const [typedResponse, setTypedResponse] = useState('');
   const responseTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const stepTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
 
   const triggerRAG = (selectedQuery: string) => {
     if (responseTimerRef.current) clearInterval(responseTimerRef.current);
+    stepTimeoutsRef.current.forEach(clearTimeout);
+    stepTimeoutsRef.current = [];
     setQuery(selectedQuery);
     setStep(1);
     setTypedResponse('');
     setLog(["[INPUT] Query received: \"" + selectedQuery + "\"", "[EMBED] Converting query text to 1536-dimensional vector..."]);
 
     // Step 2: Retrieving
-    setTimeout(() => {
+    const retrieveTimeout = setTimeout(() => {
       setStep(2);
       setLog(prev => [
         ...prev,
@@ -67,10 +70,11 @@ export function RAGSimulation() {
         "[VECTOR DB] Executing cosine similarity search against Cosmos DB...",
         "[VECTOR DB] Found 2 matched document chunks (threshold > 0.82)"
       ]);
-    }, 1500);
+    }, 900);
+    stepTimeoutsRef.current.push(retrieveTimeout);
 
     // Step 3: Prompt assembly & LLM synthesis
-    setTimeout(() => {
+    const synthesizeTimeout = setTimeout(() => {
       setStep(3);
       setLog(prev => [
         ...prev,
@@ -83,27 +87,29 @@ export function RAGSimulation() {
       let charIdx = 0;
       responseTimerRef.current = setInterval(() => {
         if (charIdx < fullResponse.length) {
-          setTypedResponse(fullResponse.slice(0, charIdx + 1));
-          charIdx++;
+          charIdx += 3;
+          setTypedResponse(fullResponse.slice(0, charIdx));
         } else {
           if (responseTimerRef.current) clearInterval(responseTimerRef.current);
           setStep(4);
           setLog(prev => [...prev, "[SUCCESS] Retrieval augmented synthesis completed in 2.8s."]);
         }
-      }, 15);
-    }, 3200);
+      }, 32);
+    }, 1900);
+    stepTimeoutsRef.current.push(synthesizeTimeout);
   };
 
   useEffect(() => {
     return () => {
       if (responseTimerRef.current) clearInterval(responseTimerRef.current);
+      stepTimeoutsRef.current.forEach(clearTimeout);
     };
   }, []);
 
   const activeAnswer = RAG_ANSWERS[query] || null;
 
   return (
-    <div className="bg-[#FAF9F6] border border-brand-divider p-6 font-sans text-brand-dark flex flex-col md:flex-row gap-6 h-full min-h-[450px]">
+    <div className="bg-[#FAF9F6] border border-brand-divider p-4 sm:p-6 font-sans text-brand-dark flex flex-col md:flex-row gap-5 sm:gap-6 h-full min-h-[28rem]">
       {/* Simulation Controls & Chat View */}
       <div className="flex-1 flex flex-col justify-between">
         <div>
@@ -192,7 +198,15 @@ export function RAGSimulation() {
 
         {step > 0 && (
           <button
-            onClick={() => { setStep(0); setQuery(''); setTypedResponse(''); setLog([]); }}
+            onClick={() => {
+              if (responseTimerRef.current) clearInterval(responseTimerRef.current);
+              stepTimeoutsRef.current.forEach(clearTimeout);
+              stepTimeoutsRef.current = [];
+              setStep(0);
+              setQuery('');
+              setTypedResponse('');
+              setLog([]);
+            }}
             className="flex items-center justify-center space-x-2 text-[10px] font-mono uppercase tracking-wider border border-brand-dark py-2 hover:bg-brand-dark hover:text-brand-bg transition-all"
           >
             <RotateCcw size={12} />
@@ -281,7 +295,7 @@ export function SaaSSimulation() {
   const latency = healthyMultiplier === 0 ? 0 : Math.round(baseLatency + downSvcPenalty + queuePenalty + loadPenalty);
 
   return (
-    <div className="bg-[#FAF9F6] border border-brand-divider p-6 font-sans text-brand-dark flex flex-col gap-6">
+    <div className="bg-[#FAF9F6] border border-brand-divider p-4 sm:p-6 font-sans text-brand-dark flex flex-col gap-5 sm:gap-6">
       <div>
         <h4 className="text-xs font-mono uppercase tracking-widest text-brand-accent mb-2">{"// Auto-Scaling Load simulation"}</h4>
         <p className="text-xs text-brand-muted">Configure variables using sliders and toggle services to see cluster containers scale in real-time.</p>
@@ -301,6 +315,7 @@ export function SaaSSimulation() {
               min="1"
               max="50"
               value={traffic}
+              aria-label="Traffic rate"
               onChange={(e) => setTraffic(Number(e.target.value))}
               className="w-full h-1 bg-brand-divider rounded-lg appearance-none cursor-pointer accent-brand-accent"
             />
@@ -317,6 +332,7 @@ export function SaaSSimulation() {
               min="5"
               max="200"
               value={tenants}
+              aria-label="Active tenants"
               onChange={(e) => setTenants(Number(e.target.value))}
               className="w-full h-1 bg-brand-divider rounded-lg appearance-none cursor-pointer accent-brand-accent"
             />
@@ -395,7 +411,8 @@ export function SaaSSimulation() {
                       <span>CRITICAL ERROR: AUTH_SVC OFFLINE · 0 ACCESS KEYS GENERATING</span>
                     </div>
                   ) : (
-                    Array.from({ length: instances.auth }).map((_, i) => {
+                    <>
+                      {Array.from({ length: Math.min(instances.auth, 12) }).map((_, i) => {
                       const podCpu = Math.min(99, Math.max(10, Math.round(avgCpu + (i * 3) % 9)));
                       return (
                         <div key={i} className="flex-1 min-w-[85px] max-w-[120px] bg-[#141414] border border-[#222] rounded-sm p-2 flex flex-col justify-between space-y-1 hover:border-brand-accent/40 transition-all duration-300">
@@ -412,7 +429,13 @@ export function SaaSSimulation() {
                           </div>
                         </div>
                       );
-                    })
+                    })}
+                      {instances.auth > 12 && (
+                        <div className="flex-1 min-w-[85px] max-w-[120px] bg-[#191919] border border-brand-accent/30 rounded-sm p-2 flex items-center justify-center text-[9px] text-brand-accent">
+                          +{instances.auth - 12} PODS
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -432,7 +455,8 @@ export function SaaSSimulation() {
                       <span>CRITICAL OUTAGE: CORE_DATABASE_SERVER OFFLINE · 503 SERVICE UNAVAILABLE</span>
                     </div>
                   ) : (
-                    Array.from({ length: instances.core }).map((_, i) => {
+                    <>
+                      {Array.from({ length: Math.min(instances.core, 12) }).map((_, i) => {
                       const podCpu = Math.min(99, Math.max(10, Math.round(avgCpu - 2 + (i * 4) % 7)));
                       return (
                         <div key={i} className="flex-1 min-w-[85px] max-w-[120px] bg-[#141414] border border-[#222] rounded-sm p-2 flex flex-col justify-between space-y-1 hover:border-[#5DB075]/40 transition-all duration-300">
@@ -449,7 +473,13 @@ export function SaaSSimulation() {
                           </div>
                         </div>
                       );
-                    })
+                    })}
+                      {instances.core > 12 && (
+                        <div className="flex-1 min-w-[85px] max-w-[120px] bg-[#191919] border border-[#5DB075]/30 rounded-sm p-2 flex items-center justify-center text-[9px] text-[#5DB075]">
+                          +{instances.core - 12} PODS
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -469,7 +499,8 @@ export function SaaSSimulation() {
                       <span>CRITICAL ERROR: QUEUE RUNNERS OFFLINE · SERVICE BUS ACCUMULATING PAYLOADS</span>
                     </div>
                   ) : (
-                    Array.from({ length: instances.jobs }).map((_, i) => {
+                    <>
+                      {Array.from({ length: Math.min(instances.jobs, 12) }).map((_, i) => {
                       const podCpu = Math.min(99, Math.max(10, Math.round(avgCpu + 4 - (i * 5) % 8)));
                       return (
                         <div key={i} className="flex-1 min-w-[85px] max-w-[120px] bg-[#141414] border border-[#222] rounded-sm p-2 flex flex-col justify-between space-y-1 hover:border-[#FFBD2E]/40 transition-all duration-300">
@@ -486,7 +517,13 @@ export function SaaSSimulation() {
                           </div>
                         </div>
                       );
-                    })
+                    })}
+                      {instances.jobs > 12 && (
+                        <div className="flex-1 min-w-[85px] max-w-[120px] bg-[#191919] border border-[#FFBD2E]/30 rounded-sm p-2 flex items-center justify-center text-[9px] text-[#FFBD2E]">
+                          +{instances.jobs - 12} PODS
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -530,6 +567,7 @@ export function WorkflowSimulation() {
   const [activeNode, setActiveNode] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<string>('trigger');
   const [logs, setLogs] = useState<string[]>([]);
+  const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
   
   // Custom configuration states for workflow nodes
   const [nodeConfigs, setNodeConfigs] = useState({
@@ -564,6 +602,8 @@ export function WorkflowSimulation() {
 
   const handleRun = () => {
     if (isRunning) return;
+    timeoutsRef.current.forEach(clearTimeout);
+    timeoutsRef.current = [];
     setIsRunning(true);
     setLogs([]);
     
@@ -572,7 +612,7 @@ export function WorkflowSimulation() {
     setLogs(prev => [...prev, `[TRIGGER] Listening on route: ${nodeConfigs.trigger.route}`, `[TRIGGER] Auth check verified: OK`, `[TRIGGER] Payload received: { userId: "user_8fd91", action: "upgrade" }`]);
 
     // Step 2: Orchestrator
-    setTimeout(() => {
+    const orchestratorTimeout = setTimeout(() => {
       setActiveNode('orchestrator');
       setLogs(prev => [
         ...prev,
@@ -580,20 +620,22 @@ export function WorkflowSimulation() {
         `[AGENT] Assembling custom JSON output schema definitions...`,
         `[AGENT] LLM response received: { tier: "Enterprise", rateLimit: 500 } [Token Cost: $0.00045]`
       ]);
-    }, 1500);
+    }, 1000);
+    timeoutsRef.current.push(orchestratorTimeout);
 
     // Step 3: Webhook
-    setTimeout(() => {
+    const webhookTimeout = setTimeout(() => {
       setActiveNode('webhook');
       setLogs(prev => [
         ...prev,
         `[WEBHOOK] Dispatched POST request to ${nodeConfigs.webhook.url}`,
         `[WEBHOOK] Response code: 201 Created (142ms)`
       ]);
-    }, 3000);
+    }, 2000);
+    timeoutsRef.current.push(webhookTimeout);
 
     // Step 4: DB
-    setTimeout(() => {
+    const dbTimeout = setTimeout(() => {
       setActiveNode('db');
       setLogs(prev => [
         ...prev,
@@ -601,21 +643,29 @@ export function WorkflowSimulation() {
         `[DB] Executing record upsert operation...`,
         `[DB] Success. Audit ID: #aud_77492c10`
       ]);
-    }, 4500);
+    }, 3000);
+    timeoutsRef.current.push(dbTimeout);
 
     // Done
-    setTimeout(() => {
+    const doneTimeout = setTimeout(() => {
       setActiveNode(null);
       setIsRunning(false);
       setLogs(prev => [
         ...prev,
-        `[SUCCESS] Automation pipeline executed in 5.8s.`
+        `[SUCCESS] Automation pipeline executed in 4.0s.`
       ]);
-    }, 5800);
+    }, 4000);
+    timeoutsRef.current.push(doneTimeout);
   };
 
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach(clearTimeout);
+    };
+  }, []);
+
   return (
-    <div className="bg-[#FAF9F6] border border-brand-divider p-6 font-sans text-brand-dark flex flex-col gap-6">
+    <div className="bg-[#FAF9F6] border border-brand-divider p-4 sm:p-6 font-sans text-brand-dark flex flex-col gap-5 sm:gap-6">
       <div>
         <h4 className="text-xs font-mono uppercase tracking-widest text-brand-accent mb-2">{"// Pipeline Designer & Orchestration"}</h4>
         <p className="text-xs text-brand-muted">Click on workflow nodes to configure their backend variables. Run the workflow to animate execution.</p>
@@ -623,9 +673,9 @@ export function WorkflowSimulation() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         {/* Node Layout Canvas */}
-        <div className="lg:col-span-8 border border-brand-divider bg-[#F2F1EC] p-6 relative flex flex-col justify-between min-h-[300px]">
+        <div className="lg:col-span-8 border border-brand-divider bg-[#F2F1EC] p-4 sm:p-6 relative flex flex-col justify-between min-h-[300px]">
           {/* SVG paths connecting nodes */}
-          <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 pointer-events-none hidden sm:block">
             <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
               {/* Connector line 1 */}
               <line x1="20%" y1="50%" x2="40%" y2="50%" stroke="#C0BEB7" strokeWidth="2" />
@@ -652,9 +702,9 @@ export function WorkflowSimulation() {
           </div>
 
           {/* Interactive Node Buttons */}
-          <div className="relative z-10 flex-1 flex items-center justify-around w-full">
+          <div className="relative z-10 flex-1 flex flex-col sm:flex-row items-stretch sm:items-center justify-around w-full gap-3 sm:gap-0">
             {/* 1. Trigger */}
-            <div className="w-[28%] flex flex-col items-center">
+            <div className="w-full sm:w-[28%] flex flex-col items-center">
               <button
                 onClick={() => setSelectedNode('trigger')}
                 className={`w-full p-4 border text-center transition-all bg-[#FAF9F6] flex flex-col items-center gap-1.5 ${
@@ -672,7 +722,7 @@ export function WorkflowSimulation() {
             </div>
 
             {/* 2. Orchestrator */}
-            <div className="w-[30%] flex flex-col items-center">
+            <div className="w-full sm:w-[30%] flex flex-col items-center">
               <button
                 onClick={() => setSelectedNode('orchestrator')}
                 className={`w-full p-4 border text-center transition-all bg-[#FAF9F6] flex flex-col items-center gap-1.5 ${
@@ -690,7 +740,7 @@ export function WorkflowSimulation() {
             </div>
 
             {/* Split End Nodes */}
-            <div className="w-[28%] flex flex-col justify-center gap-6">
+            <div className="w-full sm:w-[28%] flex flex-col justify-center gap-3 sm:gap-6">
               {/* 3. Webhook */}
               <button
                 onClick={() => setSelectedNode('webhook')}
@@ -900,6 +950,7 @@ const TELEMETRY_DATA = {
 export function AnalyticsSimulation() {
   const [metric, setMetric] = useState<'velocity' | 'deployments' | 'mttr' | 'errors'>('velocity');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   const activeMetric = TELEMETRY_DATA[metric];
 
@@ -930,7 +981,7 @@ export function AnalyticsSimulation() {
   const areaD = `${pathD} L ${getX(activeMetric.data.length - 1)},${height - padding.bottom} L ${getX(0)},${height - padding.bottom} Z`;
 
   return (
-    <div className="bg-[#FAF9F6] border border-brand-divider p-6 font-sans text-brand-dark flex flex-col gap-6">
+    <div className="bg-[#FAF9F6] border border-brand-divider p-4 sm:p-6 font-sans text-brand-dark flex flex-col gap-5 sm:gap-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h4 className="text-xs font-mono uppercase tracking-widest text-brand-accent mb-1">{"// Telemetry Analytics Engine"}</h4>
@@ -984,9 +1035,9 @@ export function AnalyticsSimulation() {
               {/* Line path */}
               <motion.path
                 key={metric}
-                initial={{ pathLength: 0 }}
+                initial={{ pathLength: shouldReduceMotion ? 1 : 0 }}
                 animate={{ pathLength: 1 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
+                transition={{ duration: shouldReduceMotion ? 0.01 : 0.8, ease: "easeOut" }}
                 d={pathD}
                 fill="none"
                 stroke="#B69B75"

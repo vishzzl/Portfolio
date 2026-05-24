@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Terminal as TerminalIcon, CornerDownLeft } from 'lucide-react';
 
 interface TerminalLine {
@@ -39,6 +39,8 @@ export default function Terminal({ isActive }: { isActive: boolean }) {
   const bodyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const sequenceTimoutRef = useRef<NodeJS.Timeout | null>(null);
+  const quickCommandTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   // Intersection Observer to start typing when visible
   useEffect(() => {
@@ -59,6 +61,12 @@ export default function Terminal({ isActive }: { isActive: boolean }) {
   // Run the initial typing simulation
   useEffect(() => {
     if (!isActive || !isIntersecting) return;
+
+    if (shouldReduceMotion) {
+      setLines(INITIAL_LINES);
+      setIsTypingInitial(false);
+      return;
+    }
 
     let lineIdx = 0;
     let charIdx = 0;
@@ -131,7 +139,7 @@ export default function Terminal({ isActive }: { isActive: boolean }) {
     return () => {
       if (sequenceTimoutRef.current) clearTimeout(sequenceTimoutRef.current);
     };
-  }, [isActive, isIntersecting]);
+  }, [isActive, isIntersecting, shouldReduceMotion]);
 
   // Scroll to bottom of terminal body whenever lines change
   useEffect(() => {
@@ -219,6 +227,10 @@ export default function Terminal({ isActive }: { isActive: boolean }) {
   };
 
   const handleQuickCommand = (cmd: string) => {
+    if (quickCommandTimeoutRef.current) {
+      clearTimeout(quickCommandTimeoutRef.current);
+    }
+
     if (cmd === 'clear') {
       setLines([]);
       setCurrentInput('');
@@ -231,7 +243,7 @@ export default function Terminal({ isActive }: { isActive: boolean }) {
 
     // Set the input, wait a brief moment to simulate typing, then execute
     setCurrentInput(cmd);
-    setTimeout(() => {
+    quickCommandTimeoutRef.current = setTimeout(() => {
       // Execute command directly
       if (isTypingInitial) {
         if (sequenceTimoutRef.current) clearTimeout(sequenceTimoutRef.current);
@@ -291,6 +303,12 @@ export default function Terminal({ isActive }: { isActive: boolean }) {
     }, 200);
   };
 
+  useEffect(() => {
+    return () => {
+      if (quickCommandTimeoutRef.current) clearTimeout(quickCommandTimeoutRef.current);
+    };
+  }, []);
+
   const entranceVariants = {
     hidden: { opacity: 0, y: 18 },
     visible: {
@@ -310,7 +328,7 @@ export default function Terminal({ isActive }: { isActive: boolean }) {
       variants={entranceVariants}
       initial="hidden"
       animate={isActive ? 'visible' : 'hidden'}
-      className="w-full max-w-lg h-[380px] bg-[#0F0F0F] rounded-[10px] shadow-2xl border border-[#222] overflow-hidden flex flex-col font-mono text-[11px] leading-[1.7]"
+      className="w-full max-w-lg h-[min(380px,70svh)] bg-[#0F0F0F] rounded-[10px] shadow-2xl border border-[#222] overflow-hidden flex flex-col font-mono text-[11px] leading-[1.7]"
       style={{
         boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
       }}

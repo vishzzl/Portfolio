@@ -1,9 +1,9 @@
-import type { Metadata } from 'next';
-import { Inter, Cormorant_Garamond, JetBrains_Mono } from 'next/font/google';
-import './globals.css';
+import type { Metadata, Viewport } from 'next';
+import { Cormorant_Garamond, Inter, JetBrains_Mono } from 'next/font/google';
 import CustomCursor from '@/components/CustomCursor';
 import GrainEffect from '@/components/GrainEffect';
 import ScrollProvider from '@/components/ScrollProvider';
+import './globals.css';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -26,15 +26,33 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Vishal — Full Stack + AI Engineer',
+  title: {
+    default: 'Vishal — Full Stack + AI Engineer',
+    template: '%s | Vishal',
+  },
   description:
     'Independent systems architect building scalable cloud-native platforms, intelligent AI workflows, and enterprise-grade digital experiences.',
-  metadataBase: new URL('https://vishal-portfolio.vercel.app'), // Placeholder, fallback URL for relative metadata assets
+  metadataBase: new URL('https://vishal-portfolio.vercel.app'),
+  applicationName: 'Vishal Portfolio',
+  authors: [{ name: 'Vishal Vishwakarma', url: 'https://www.linkedin.com/in/vishzzl/' }],
+  creator: 'Vishal Vishwakarma',
+  keywords: [
+    'Full Stack Engineer',
+    'AI Engineer',
+    'Next.js',
+    'Azure',
+    'Cloud Architecture',
+    'RAG',
+    'Portfolio',
+  ],
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
     title: 'Vishal — Full Stack + AI Engineer',
     description:
       'Independent systems architect building scalable cloud-native platforms, intelligent AI workflows, and enterprise-grade digital experiences.',
-    url: './',
+    url: '/',
     siteName: 'Vishal Portfolio',
     images: [
       {
@@ -58,6 +76,22 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  icons: {
+    icon: '/favicon.ico',
+  },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#FAF9F6',
+  colorScheme: 'light',
 };
 
 export default function RootLayout({

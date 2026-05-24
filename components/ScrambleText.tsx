@@ -26,6 +26,11 @@ export default function ScrambleText({ text, delay, duration = 0.8 }: ScrambleTe
   useEffect(() => {
     if (!isRevealed) return;
 
+    if (duration <= 0.05) {
+      setDisplayText(text);
+      return;
+    }
+
     let frame = 0;
     const fps = 18; // Lower frame rate for character updates to make it feel calm and deliberate
     const totalFrames = Math.floor(duration * fps);

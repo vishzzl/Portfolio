@@ -1,9 +1,14 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 
 export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { margin: '-15% 0px -15% 0px' });
+  const shouldReduceMotion = useReducedMotion();
+  const shouldAnimate = isActive && isInView && !shouldReduceMotion;
+
   // Entrance timeline delay offsets
   const startDelay = 1.2;
 
@@ -82,10 +87,11 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
 
   return (
     <motion.div
+      ref={containerRef}
       variants={entranceVariants}
       initial="hidden"
       animate={isActive ? 'visible' : 'hidden'}
-      className="w-full max-w-xl aspect-[400/280] bg-transparent relative select-none interactive-cursor-target cursor-none"
+      className="w-full max-w-[min(36rem,100%)] aspect-[400/280] bg-transparent relative select-none interactive-cursor-target md:cursor-none"
     >
       <svg viewBox="0 0 400 280" className="w-full h-full fill-none overflow-visible" xmlns="http://www.w3.org/2000/svg">
           
@@ -108,7 +114,7 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
           />
 
           {/* SIGNAL DOT (Travels up central branch every 3.8s, begins at t=2.0s) */}
-          {isActive && (
+          {shouldAnimate && (
             <circle r="3" fill="#B69B75">
               <animateMotion
                 dur="3.8s"
@@ -159,7 +165,7 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
               r="6" 
               fill="#B69B75" 
               variants={popIn(0)} 
-              animate={isActive ? 'visible' : 'hidden'} 
+              animate={shouldAnimate ? 'visible' : 'hidden'} 
               whileHover={{ scale: 1.4 }}
               style={{ transformOrigin: 'center' }}
             />
@@ -172,7 +178,7 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
               cy="175" 
               r="4" 
               variants={popIn(1.1)} 
-              animate={isActive ? 'visible' : 'hidden'} 
+              animate={shouldAnimate ? 'visible' : 'hidden'} 
               whileHover={{ scale: 1.4, stroke: '#B69B75' }}
               style={{ transformOrigin: 'center' }}
             />
@@ -181,7 +187,7 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
               cy="175" 
               r="4" 
               variants={popIn(1.1)} 
-              animate={isActive ? 'visible' : 'hidden'} 
+              animate={shouldAnimate ? 'visible' : 'hidden'} 
               whileHover={{ scale: 1.4, stroke: '#B69B75' }}
               style={{ transformOrigin: 'center' }}
             />
@@ -197,7 +203,7 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
               r="3.25" 
               stroke="#C8C7C2" 
               variants={popIn(1.9)} 
-              animate={isActive ? 'visible' : 'hidden'} 
+              animate={shouldAnimate ? 'visible' : 'hidden'} 
               whileHover={{ scale: 1.4, stroke: '#B69B75' }}
               style={{ transformOrigin: 'center' }}
             />
@@ -238,8 +244,8 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
 
           {/* GEN 3 FRONTIER GLOWS (Center AI node at top gets two ambient glow rings) */}
           <g transform="translate(200, 45)">
-            <motion.circle r="12" stroke="#B69B75" strokeWidth="0.8" fill="none" variants={pulseGlow(1.4)} animate={isActive ? 'visible' : 'hidden'} />
-            <motion.circle r="18" stroke="#B69B75" strokeWidth="0.6" fill="none" variants={pulseGlow(1.8)} animate={isActive ? 'visible' : 'hidden'} />
+            <motion.circle r="12" stroke="#B69B75" strokeWidth="0.8" fill="none" variants={pulseGlow(1.4)} animate={shouldAnimate ? 'visible' : 'hidden'} />
+            <motion.circle r="18" stroke="#B69B75" strokeWidth="0.6" fill="none" variants={pulseGlow(1.8)} animate={shouldAnimate ? 'visible' : 'hidden'} />
           </g>
 
           {/* GEN 3 FRONTIER NODES (filled amber, pulsing, size 4.5px -> r=2.25px, center AI = 6.5px -> r=3.25px) */}
@@ -250,7 +256,7 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
               cy="45" 
               r="2.25" 
               variants={popIn(2.7)} 
-              animate={isActive ? 'visible' : 'hidden'} 
+              animate={shouldAnimate ? 'visible' : 'hidden'} 
               whileHover={{ scale: 1.4 }}
               style={{ transformOrigin: 'center' }}
             />
@@ -260,7 +266,7 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
               cy="45" 
               r="2.25" 
               variants={popIn(2.7)} 
-              animate={isActive ? 'visible' : 'hidden'} 
+              animate={shouldAnimate ? 'visible' : 'hidden'} 
               whileHover={{ scale: 1.4 }}
               style={{ transformOrigin: 'center' }}
             />
@@ -270,7 +276,7 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
               cy="45" 
               r="2.25" 
               variants={popIn(2.7)} 
-              animate={isActive ? 'visible' : 'hidden'} 
+              animate={shouldAnimate ? 'visible' : 'hidden'} 
               whileHover={{ scale: 1.4 }}
               style={{ transformOrigin: 'center' }}
             />
@@ -280,7 +286,7 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
               cy="45" 
               r="2.25" 
               variants={popIn(2.7)} 
-              animate={isActive ? 'visible' : 'hidden'} 
+              animate={shouldAnimate ? 'visible' : 'hidden'} 
               whileHover={{ scale: 1.4 }}
               style={{ transformOrigin: 'center' }}
             />
@@ -291,7 +297,7 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
               cy="45" 
               r="3.25" 
               variants={popIn(2.7)} 
-              animate={isActive ? 'visible' : 'hidden'} 
+              animate={shouldAnimate ? 'visible' : 'hidden'} 
               whileHover={{ scale: 1.4 }}
               style={{ transformOrigin: 'center' }}
             />
@@ -299,7 +305,7 @@ export default function ScaleNetwork({ isActive }: { isActive: boolean }) {
 
           {/* Frontier Node Opacity Pulsars (Overlay matching coordinates for active states) */}
           <g fill="#B69B75" opacity="0.7">
-            {isActive && (
+            {shouldAnimate && (
               <>
                 <motion.circle cx="60" cy="45" r="3.5" variants={pulseOpacity} animate="visible" />
                 <motion.circle cx="130" cy="45" r="3.5" variants={pulseOpacity} animate="visible" />
