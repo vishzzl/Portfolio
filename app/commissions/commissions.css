@@ -1,0 +1,511 @@
+/* ═══════════════════════════════════════════════════════════════
+   Work With Me — Design System
+   Apple Liquid Glass · Editorial Typography · Ambient Texture
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Tokens ────────────────────────────────────────────────── */
+.wwm-page {
+  --bg: #FAFAF8;
+  --surface: #FFFFFF;
+  --text-primary: #161616;
+  --text-muted: #6B6B6B;
+  --border: rgba(0, 0, 0, 0.08);
+  --accent: #2563EB;
+  --accent-light: rgba(37, 99, 235, 0.06);
+
+  /* Liquid Glass */
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg-hover: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.45);
+  --glass-border-hover: rgba(255, 255, 255, 0.65);
+  --glass-blur: 24px;
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+  --glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.07);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --glass-highlight-hover: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+  /* Spacing */
+  --section-px: clamp(24px, 6vw, 80px);
+  --section-py: clamp(72px, 10vw, 140px);
+  --container-max: 1200px;
+
+  /* Easing */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ── Page Base ─────────────────────────────────────────────── */
+.wwm-page {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+  min-width: 320px;
+}
+
+/* ── Ambient Dot Grid ──────────────────────────────────────── */
+.wwm-dot-grid {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ── Cursor Spotlight ──────────────────────────────────────── */
+.wwm-spotlight::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
+    rgba(37, 99, 235, 0.04),
+    transparent 60%
+  );
+  transition: opacity 0.3s ease;
+}
+
+/* ── Noise Overlay ─────────────────────────────────────────── */
+.wwm-noise {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.025;
+}
+
+.wwm-noise svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Scroll Progress ───────────────────────────────────────── */
+.wwm-scroll-progress {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  opacity: 0.3;
+  z-index: 50;
+  pointer-events: none;
+  transform-origin: top;
+}
+
+/* ── Section Container ─────────────────────────────────────── */
+.wwm-section {
+  padding: var(--section-py) var(--section-px);
+  max-width: var(--container-max);
+  margin: 0 auto;
+  position: relative;
+}
+
+/* ── Typography ────────────────────────────────────────────── */
+.wwm-h1 {
+  font-family: var(--font-instrument), Georgia, serif;
+  font-size: clamp(44px, 6vw, 72px);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+
+.wwm-h2 {
+  font-family: var(--font-instrument), Georgia, serif;
+  font-size: clamp(32px, 4.5vw, 48px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.wwm-card-title {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: clamp(22px, 2.5vw, 28px);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.wwm-body {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: clamp(16px, 1.2vw, 18px);
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.wwm-eyebrow {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  display: inline-block;
+  position: relative;
+  padding-bottom: 8px;
+}
+
+/* Eyebrow Underline Draw (Effect #9) */
+.wwm-eyebrow::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: var(--accent);
+  transition: width 0.5s var(--ease-out-expo);
+}
+
+.wwm-eyebrow.is-visible::after {
+  width: 32px;
+}
+
+.wwm-mono {
+  font-family: var(--font-mono-terminal), 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.wwm-impact-number {
+  font-family: var(--font-instrument), Georgia, serif;
+  font-style: italic;
+  font-size: clamp(28px, 3vw, 36px);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* ── Liquid Glass Card ─────────────────────────────────────── */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow), var(--glass-highlight);
+  transition:
+    transform 0.3s var(--ease-out-expo),
+    background 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+  transform-style: preserve-3d;
+}
+
+.glass-card:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow-hover), var(--glass-highlight-hover);
+}
+
+/* Simple card hover lift (for non-tilt cards) */
+.glass-card-lift:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* ── Liquid Glass Button ───────────────────────────────────── */
+.glass-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: 12px;
+  cursor: pointer;
+  min-height: 48px;
+  transition:
+    transform 0.2s var(--ease-spring),
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.glass-btn:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+/* Primary — filled accent */
+.glass-btn-primary {
+  background: var(--accent);
+  color: #FFFFFF;
+  border: 1px solid rgba(37, 99, 235, 0.8);
+  box-shadow:
+    0 2px 8px rgba(37, 99, 235, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.glass-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 20px rgba(37, 99, 235, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Secondary — ghost glass */
+.glass-btn-ghost {
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.glass-btn-ghost:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* ── Focus Ring ────────────────────────────────────────────── */
+.wwm-page *:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ── Link Underline ────────────────────────────────────────── */
+.wwm-link {
+  text-decoration: none;
+  color: var(--text-primary);
+  background:
+    linear-gradient(var(--accent), var(--accent)) bottom / 0% 1px no-repeat;
+  transition: background-size 0.3s ease;
+}
+
+.wwm-link:hover {
+  background-size: 100% 1px;
+}
+
+/* ── Green Pulse (Effect #10) ──────────────────────────────── */
+.wwm-pulse-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 8px;
+  height: 8px;
+}
+
+.wwm-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22C55E;
+  position: relative;
+  z-index: 1;
+}
+
+.wwm-pulse-ring {
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  background: #22C55E;
+  animation: wwm-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes wwm-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* ── Form Floating Labels (Effect #7) ──────────────────────── */
+.wwm-field-wrap {
+  position: relative;
+}
+
+.wwm-field-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-muted);
+  pointer-events: none;
+  transition:
+    transform 0.2s ease,
+    font-size 0.2s ease,
+    color 0.2s ease,
+    top 0.2s ease;
+  transform-origin: left center;
+}
+
+/* Textarea label sits at top */
+.wwm-field-wrap--textarea .wwm-field-label {
+  top: 20px;
+  transform: translateY(0);
+}
+
+.wwm-field-input,
+.wwm-field-select,
+.wwm-field-textarea {
+  width: 100%;
+  padding: 20px 16px 8px;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-primary);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.wwm-field-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.wwm-field-select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236B6B6B' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+
+/* Focused state */
+.wwm-field-input:focus,
+.wwm-field-select:focus,
+.wwm-field-textarea:focus {
+  outline: none;
+  border-color: rgba(37, 99, 235, 0.5);
+  background-color: rgba(37, 99, 235, 0.03);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+/* Float label when focused or has value */
+.wwm-field-input:focus ~ .wwm-field-label,
+.wwm-field-input:not(:placeholder-shown) ~ .wwm-field-label,
+.wwm-field-select:focus ~ .wwm-field-label,
+.wwm-field-select:not([value=""]) ~ .wwm-field-label,
+.wwm-field-wrap--has-value .wwm-field-label,
+.wwm-field-textarea:focus ~ .wwm-field-label,
+.wwm-field-textarea:not(:placeholder-shown) ~ .wwm-field-label {
+  top: 12px;
+  transform: translateY(0);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+/* ── Scope Row Hover Bar ───────────────────────────────────── */
+.wwm-scope-row {
+  position: relative;
+}
+
+.wwm-scope-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.3s var(--ease-out-expo);
+}
+
+.wwm-scope-row:hover::before {
+  transform: scaleY(1);
+}
+
+/* ── Process Line ──────────────────────────────────────────── */
+.wwm-process-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  stroke: var(--border);
+  stroke-width: 1;
+  fill: none;
+}
+
+/* ── Selection ─────────────────────────────────────────────── */
+.wwm-page ::selection {
+  background-color: rgba(37, 99, 235, 0.1);
+  color: var(--text-primary);
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+.wwm-page ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.wwm-page ::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+.wwm-page ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.wwm-page ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .wwm-page {
+    --section-py: 72px;
+    --section-px: 24px;
+  }
+
+  .glass-card {
+    border-radius: 14px;
+  }
+
+  .glass-btn {
+    width: 100%;
+  }
+}
+
+/* ── Reduced Motion ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .wwm-page *,
+  .wwm-page *::before,
+  .wwm-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .wwm-pulse-ring {
+    display: none;
+  }
+
+  .wwm-spotlight::before {
+    display: none;
+  }
+}

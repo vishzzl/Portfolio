@@ -8,6 +8,7 @@ import {
 import SectionHeader from '@/components/ui/SectionHeader';
 import { ProjectOpenButton } from '@/components/ui/OpenCardButton';
 import { PROJECT_CARDS, type ProjectCard } from '@/lib/portfolio-data';
+import Link from 'next/link';
 
 function ProjectDiagram({ diagram }: { diagram: ProjectCard['diagram'] }) {
   switch (diagram) {
@@ -87,6 +88,18 @@ export default function WorkSection() {
             </BorderDrawCard>
           );
         })}
+      </div>
+
+      <div className="mt-16 pt-8 border-t border-brand-divider/40 text-center">
+        <p className="text-sm text-brand-muted mb-3 font-sans">
+          Looking for boutique website design, local SEO, or independent client portals?
+        </p>
+        <Link
+          href="/commissions"
+          className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-brand-accent hover:text-brand-dark transition-colors duration-200 focus-visible-ring"
+        >
+          <span>View Client Commission Work →</span>
+        </Link>
       </div>
     </section>
   );

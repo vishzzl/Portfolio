@@ -1,4 +1,6 @@
 import { Github, Linkedin, Mail, Phone } from 'lucide-react';
+import Link from 'next/link';
+
 
 export default function Footer() {
   return (
@@ -7,6 +9,12 @@ export default function Footer() {
         Vishal © 2025 · Full Stack + AI Engineer
       </div>
       <div className="flex flex-wrap gap-x-6 sm:gap-x-8 gap-y-4 justify-center">
+        <Link
+          href="/commissions"
+          className="inline-flex min-h-11 items-center gap-1 hover:text-brand-dark transition-colors duration-300 focus-visible-ring"
+        >
+          <span>Commissions</span>
+        </Link>
         <a
           href="https://www.linkedin.com/in/vishzzl/"
           target="_blank"
